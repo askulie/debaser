@@ -1,0 +1,116 @@
+                        d  eee  b    aaa   sss   eee   rrr
+                        d e   e b       a s     e   e r
+                      ddd eeeee bbb   aaa  sss  eeeee r
+                     d  d e     b  b a  a     s e     r
+                     d  d  eee  bbb   aaa  sss   eee  r
+                      dd  DEBASER IMAGE SCOURING FOR REDDIT
+===============================================================================
+Debaser is a simple image scouring utility for Reddit.  It is free and open
+source, and written in Python using the reddit_api bindings.
+===============================================================================
+>> VERSION INFORMATION
+v0.52 - 12122011
+  * Added support for uppercase file extensions on urls (ex: .JPG, .GIF)
+  * Added support for .jpeg file extension
+  * Added license information to heading comment (see below).
+  * Removed counter from main loop; used enumerate() to obtain index and len()
+    to obtain totals in error summary
+
+v0.51 - 12112011
+  * fixed bug with non-imgur urls that are downloadable
+  * added permalink output in verbose mode to add additional log information
+  * fixed cross-compatibility bug by using os.path.join & posixpath (untested)
+  * fixed bug with limit being passed as string...now it actually works!
+
+v0.50 - 12112011
+===============================================================================
+>> INSTALLATION
+
+Debaser requires the reddit_api wrappers from the following location:
+https://github.com/mellort/reddit_api
+(Installation instructions for reddit_api are included there)
+
+Debaser also requires Python 2.x specifically, as reddit_api and urllib are
+Python 2-specific.
+
+Debaser is a simple Python script that can be run from the command line.
+Therefore, you can run it from wherever it's installed.  I usually place my
+scripts in /opt and reference them via symlink to /usr/local/bin, but that's
+totally up to you.
+===============================================================================
+>> WHAT IT DOES AND HOW TO DO IT
+
+Debaser can scour a given subreddit for picture entries, then attempts to
+download them based on various criteria.  It cannot scour images from linked
+pages unless they are at imgur.com (and it also doesn't support imgur albums...
+yet).
+
+Below is the command line syntax of debaser.py:
+
+Usage: debaser.py [options] arg
+
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -s SUBREDDIT, --subreddit=SUBREDDIT
+                        name of subreddit | defaults to pics
+  -f FILTER, --filter=FILTER
+                        filter: hot, top, controversial, new | defaults to hot
+  -l LIMIT, --limit=LIMIT
+                        limit of submissions to gather | defaults to 5
+  -v, --verbose         
+  -q, --quiet           
+
+The subreddit can be basically any subreddit that exists.  For example:  pics,
+gaming, battlestations
+
+The filter must be one of the following:  hot, top, controversial, or new.
+
+The limit is the limit of submissions to gather from your subreddit.  Keep in
+mind that the more submissions you attempt to harvest, the longer it will take
+for debaser to process it, which can be a very long time at higher ranges
+depending on traffic at Reddit.
+
+I'd recommend running in verbose mode unless you're using this in another
+script (and even then, I'd redirect the output to a text to inspect later).
+The verbose output is very informative, if not very machine-friendly (I may
+try and fix that someday).  Verbose mode is not the default (as this wouldn't
+be very UNIXy at all if it were), so make sure to include the -v tag.
+
+A few examples:
+
+Get the 10 latest entries from www.reddit.com/r/battlestations, and 
+show output:
+
+python debaser.py --subreddit pics --filter new --limit 10 -v
+
+
+Get the #1 what's hot entry from wallpaper http://www.reddit.com/r/wallpaper,
+but don't show any output (might be a neat cron job if you fancy that):
+
+python debaser.py --subreddit wallpaper --filter hot --limit 1
+
+
+That's pretty simple, eh?  Keep in mind that the directory you run 
+debaser.py from is where the image files will be dumped (there's no option
+to change this behavior, nor will there ever be for simplicity's sake).
+
+Keep in mind there may be issues downloading some images.  For example,
+.gifs and .pngs from imgur.com that don't use a direct "i.imgur.com" link
+will probably not download properly in the current version.  Additionally,
+there is a bug that seems to corrupt the download of images from wikipedia
+links...they download but the file may not open (at least in gThumb and GIMP).
+
+My hope is that this program can be used to enjoy Reddit even more! I kept
+it simple to allow its use in other programs or scripts (ie, the cron job
+I mentioned above).
+===============================================================================
+>> LICENSE
+
+Copyright (c) 2011 Andy Kulie.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
