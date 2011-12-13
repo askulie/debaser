@@ -45,6 +45,9 @@ download them based on various criteria.  It cannot scour images from linked
 pages unless they are at imgur.com (and it also doesn't support imgur albums...
 yet).
 
+PLEASE NOTE!  Debaser will automatically overwrite duplicate files, so be
+aware of that when using it!
+
 Below is the command line syntax of debaser.py:
 
 Usage: debaser.py [options] arg
