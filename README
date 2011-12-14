@@ -9,6 +9,10 @@ Debaser is a simple image scouring utility for Reddit.  It is free and open
 source, and written in Python using the reddit_api bindings.
 ===============================================================================
 >> VERSION INFORMATION
+v0.53 - 12142011
+  * Changed overwrite behavior:  no overwrite by default
+  * Added -o --overwrite flag to support previous behavior
+
 v0.52 - 12122011
   * Added support for uppercase file extensions on urls (ex: .JPG, .GIF)
   * Added support for .jpeg file extension
@@ -45,8 +49,13 @@ download them based on various criteria.  It cannot scour images from linked
 pages unless they are at imgur.com (and it also doesn't support imgur albums...
 yet).
 
-PLEASE NOTE!  Debaser will automatically overwrite duplicate files, so be
-aware of that when using it!
+PLEASE NOTE!  Now in version 0.53, Debaser no longer automatically overwrites
+files which already exist.  There is a new option -o (or --overwrite) which
+duplicates the previous behavior and automatically overwrites files that
+are duplicates.  The new behavior provides a bit of a speed increase in
+cases where a lot of files have been previously downloaded (basically some
+really cheesy deduplication), and also prevents overwriting without explicitly
+asking for it.  If you're going to use the -o flag, as always, be careful!
 
 Below is the command line syntax of debaser.py:
 
@@ -61,6 +70,8 @@ Options:
                         filter: hot, top, controversial, new | defaults to hot
   -l LIMIT, --limit=LIMIT
                         limit of submissions to gather | defaults to 5
+  -o, --overwrite       automatically overwrite duplicate files (use with
+                        caution)
   -v, --verbose         
   -q, --quiet           
 
@@ -86,6 +97,12 @@ Get the 10 latest entries from www.reddit.com/r/battlestations, and
 show output:
 
 python debaser.py --subreddit pics --filter new --limit 10 -v
+
+
+Get the 5 top entries from www.reddit.com/r/wallpaper, and overwrite
+files which might already exist.
+
+python debaser.py --subreddit wallpaper --filter top --limit 5 -o
 
 
 Get the #1 what's hot entry from wallpaper http://www.reddit.com/r/wallpaper,

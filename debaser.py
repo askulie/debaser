@@ -2,6 +2,10 @@
 
 """
 debaser.py
+v0.53 - 12142011
+  * Changed overwrite behavior:  no overwrite by default
+  * Added -o --overwrite flag to support previous behavior
+
 v0.52 - 12122011 [ frozen 3:21 PM EST 12/11/2011 ]
   * Added support for uppercase file extensions on urls (ex: .JPG, .GIF)
   * Added support for .jpeg file extension
@@ -36,7 +40,8 @@ from posixpath import basename # for url splitting on non-imgur urls
 
 # add system argument for verbose mode
 verbose_mode = False
-current_version = "%prog 0.52-12122011"
+overwrite_mode = False # added to support overwrite behavior (new default is no overwrite)
+current_version = "%prog 0.53-12142011"
 current_dir = os.getcwd()
 
 ## start parse arguments
@@ -45,11 +50,14 @@ parser = OptionParser(usage, version=current_version)
 parser.add_option("-s", "--subreddit", dest="subreddit", default="pics", help="name of subreddit | defaults to %default")
 parser.add_option("-f", "--filter", dest="filter", default="hot", help="filter: hot, top, controversial, new | defaults to %default")
 parser.add_option("-l", "--limit", dest="limit", default=5, help="limit of submissions to gather | defaults to %default")
+parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", help="automatically overwrite duplicate files (use with caution)") # added to support overwrite behavior
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
 parser.add_option("-q", "--quiet", action="store_false", dest="verbose")
 (options, args) = parser.parse_args() 
 if options.verbose:
     verbose_mode = True
+if options.overwrite:
+    overwrite_mode = True
 ## end parse arguments
 
 """
@@ -109,8 +117,13 @@ for index, i in enumerate(sublist):
     parsed_url = urlparse(i.url)
     if (parsed_url.netloc == 'i.imgur.com'):
         if verbose_mode: print "Direct imgur link.  Downloading..."
-        savedto = urllib.urlretrieve(i.url, current_dir + parsed_url.path)
-        if verbose_mode: print savedto
+        if (not(overwrite_mode) and os.path.exists(os.path.join(current_dir, basename(parsed_url.path)))):
+            if verbose_mode: print "File already exists in " + current_dir + ".  Download aborted."
+            summary.append(i.url + " was previously downloaded.\nUse -o flag to enable overwrite mode.")
+            success -= 1
+        else:
+            savedto = urllib.urlretrieve(i.url, os.path.join(current_dir, basename(parsed_url.path)))
+            if verbose_mode: print savedto
     elif (parsed_url.netloc == 'imgur.com'):
         if (parsed_url.path[0:3] == '/a/'):
             if verbose_mode: print "Imgur album path not yet supported."
@@ -118,15 +131,25 @@ for index, i in enumerate(sublist):
             success -= 1
             # add support using imgur album downloader & make subdirectory for it
         else:
-            if verbose_mode: print "Indirect imgur link.  Downloading..."
-            savedto = urllib.urlretrieve(build_imgur_dl(parsed_url), current_dir + parsed_url.path + '.jpg') #build imgur direct link & download it
-            if verbose_mode: print savedto
+            if (not(overwrite_mode) and os.path.exists(os.path.join(current_dir, basename(parsed_url.path)))):
+                 if verbose_mode: print "File already exits in " + current_dir + ".  Download aborted."
+                 summary.append(i.url + " was already downloaded.\nUse -o flag to enable overwrite mode.")
+                 success -= 1
+            else:
+                 if verbose_mode: print "Indirect imgur link.  Downloading..."
+                 savedto = urllib.urlretrieve(build_imgur_dl(parsed_url), current_dir + parsed_url.path + '.jpg') #build imgur direct link & download it
+                 if verbose_mode: print savedto
     else:
         plen = len(parsed_url.path)
         if (parsed_url.path[plen-4:plen].lower() == '.jpg' or parsed_url.path[plen-4:plen].lower() == '.gif' or parsed_url.path[plen-4:plen].lower() == '.png' or  parsed_url.path[plen-4:plen].lower() == '.jpeg'): # added .lower() to all results to allow for uppercase file extensions
-            if verbose_mode: print "Unknown source.  Downloading..."
-            savedto = urllib.urlretrieve(i.url, os.path.join(current_dir, basename(parsed_url.path)))
-            print savedto
+            if (not(overwrite_mode) and os.path.exists(os.path.join(current_dir, basename(parsed_url.path)))):
+                 if verbose_mode: print "File already exists in " + current_dir + ".  Download aborted."
+                 summary.append(i.url + " was already downloaded.\nUse -o flag to enable overwrite mode.")
+                 success -= 1
+            else:
+                 if verbose_mode: print "Unknown source.  Downloading..."
+                 savedto = urllib.urlretrieve(i.url, os.path.join(current_dir, basename(parsed_url.path)))
+                 print savedto
         else:
             if verbose_mode: print "Unknown HTML encountered.  Download abort."
             summary.append(i.url + " is an unsupported URL.\nNo image files found.")
