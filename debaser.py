@@ -149,7 +149,7 @@ for index, i in enumerate(sublist):
             else:
                  if verbose_mode: print "Unknown source.  Downloading..."
                  savedto = urllib.urlretrieve(i.url, os.path.join(current_dir, basename(parsed_url.path)))
-                 print savedto
+                 if verbose_mode: print savedto
         else:
             if verbose_mode: print "Unknown HTML encountered.  Download abort."
             summary.append(i.url + " is an unsupported URL.\nNo image files found.")
