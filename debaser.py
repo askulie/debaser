@@ -47,7 +47,7 @@ from posixpath import basename # for url splitting on non-imgur urls
 verbose_mode = False
 overwrite_mode = False # added to support overwrite behavior (new default is no overwrite)
 nsfw_mode = False # added to support nsfw behavior (new default is NO nsfw items)
-current_version = "%prog 0.53-12142011"
+current_version = "%prog 0.54-12152011"
 current_dir = os.getcwd()
 
 ## start parse arguments
