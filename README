@@ -9,6 +9,11 @@ Debaser is a simple image scouring utility for Reddit.  It is free and open
 source, and written in Python using the reddit_api bindings.
 ===============================================================================
 >> VERSION INFORMATION
+v0.54 - 12152011
+  * Changed nsfw behavior:  no nsfw by default
+  * Added -n --nsfw flag to support previous behavior
+  * Fixed overwrite bug on indirect imgur links
+
 v0.53 - 12142011
   * Changed overwrite behavior:  no overwrite by default
   * Added -o --overwrite flag to support previous behavior
@@ -57,6 +62,14 @@ cases where a lot of files have been previously downloaded (basically some
 really cheesy deduplication), and also prevents overwriting without explicitly
 asking for it.  If you're going to use the -o flag, as always, be careful!
 
+ALSO NOTE!  As of version 0.54, debaser.py now allows for filtering of nsfw
+submissions.  In fact, it denies download of nsfw images unless you explicitly
+tell it to download them with the -n or --nsfw flags.  Debaser won't even
+mention any other information about the submission if the --nsfw flag is not
+set, other than giving you a warning message that it was skipped and its
+index in the list of submissions being scoured (if the --verbose flag is
+also set).
+
 Below is the command line syntax of debaser.py:
 
 Usage: debaser.py [options] arg
@@ -72,6 +85,7 @@ Options:
                         limit of submissions to gather | defaults to 5
   -o, --overwrite       automatically overwrite duplicate files (use with
                         caution)
+  -n, --nsfw            allow download of nsfw items
   -v, --verbose         
   -q, --quiet           
 

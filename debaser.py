@@ -3,7 +3,9 @@
 """
 debaser.py
 v0.54 - 12152011
-
+  * Changed nsfw behavior:  no nsfw by default
+  * Added -n --nsfw flag to support previous behavior
+  * Fixed overwrite bug on indirect imgur links
 
 v0.53 - 12142011
   * Changed overwrite behavior:  no overwrite by default
@@ -117,8 +119,16 @@ sublist = list(sublist)
 success = len(sublist)
 summary = []
 for index, i in enumerate(sublist):
+    if (not(nsfw_mode) and i.over_18):
+        if verbose_mode: print "NSFW submission found!  Skipping!"
+        summary.append("Submission #" + str(index) + " was tagged as not safe for work. Use -n flag to enable nsfw mode.")
+        success -= 1
+        continue
     if verbose_mode: 
-        print str(index) + ": " + i.title + " :: " + i.url
+        if not(i.over_18):
+            print str(index) + ": " + i.title + " :: " + i.url
+        else:
+            print str(index) + ": " + i.title + " :: " + i.url + " [NSFW]"
         print "permalink = " + i.permalink
     # parse out the url to get its parts as a 6-tuple
     parsed_url = urlparse(i.url)
@@ -138,12 +148,13 @@ for index, i in enumerate(sublist):
             success -= 1
             # add support using imgur album downloader & make subdirectory for it
         else:
-            if (not(overwrite_mode) and os.path.exists(os.path.join(current_dir, basename(parsed_url.path)))):
+            if (not(overwrite_mode) and os.path.exists(current_dir + parsed_url.path + '.jpg')): # fixed overwrite bug by adding .jpg & modifying path join
                  if verbose_mode: print "File already exits in " + current_dir + ".  Download aborted."
                  summary.append(i.url + " was already downloaded.\nUse -o flag to enable overwrite mode.")
                  success -= 1
             else:
                  if verbose_mode: print "Indirect imgur link.  Downloading..."
+                 # this path joining needs to be fixed for cross-platform compatibility
                  savedto = urllib.urlretrieve(build_imgur_dl(parsed_url), current_dir + parsed_url.path + '.jpg') #build imgur direct link & download it
                  if verbose_mode: print savedto
     else:
