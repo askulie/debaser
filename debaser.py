@@ -2,6 +2,9 @@
 
 """
 debaser.py
+v0.54 - 12152011
+
+
 v0.53 - 12142011
   * Changed overwrite behavior:  no overwrite by default
   * Added -o --overwrite flag to support previous behavior
@@ -41,6 +44,7 @@ from posixpath import basename # for url splitting on non-imgur urls
 # add system argument for verbose mode
 verbose_mode = False
 overwrite_mode = False # added to support overwrite behavior (new default is no overwrite)
+nsfw_mode = False # added to support nsfw behavior (new default is NO nsfw items)
 current_version = "%prog 0.53-12142011"
 current_dir = os.getcwd()
 
@@ -51,6 +55,7 @@ parser.add_option("-s", "--subreddit", dest="subreddit", default="pics", help="n
 parser.add_option("-f", "--filter", dest="filter", default="hot", help="filter: hot, top, controversial, new | defaults to %default")
 parser.add_option("-l", "--limit", dest="limit", default=5, help="limit of submissions to gather | defaults to %default")
 parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", help="automatically overwrite duplicate files (use with caution)") # added to support overwrite behavior
+parser.add_option("-n", "--nsfw", action="store_true", dest="nsfw", help="allow download of nsfw items") # added to support nsfw filtering
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
 parser.add_option("-q", "--quiet", action="store_false", dest="verbose")
 (options, args) = parser.parse_args() 
@@ -58,6 +63,8 @@ if options.verbose:
     verbose_mode = True
 if options.overwrite:
     overwrite_mode = True
+if options.nsfw:
+    nsfw_mode = True
 ## end parse arguments
 
 """
