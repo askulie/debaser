@@ -2,6 +2,12 @@
 
 """
 debaser.py
+v0.55 - 10192012
+  * Added support for Imgur albums if imguralbum.py is available
+  * Added -a --album flag to allow for suppression of album downloads if desired.
+  * Currently, debaser.py only checks if an album exists, not whether its contents exist
+    when not using -o --overwrite mode.
+
 v0.54 - 12152011
   * Changed nsfw behavior:  no nsfw by default
   * Added -n --nsfw flag to support previous behavior
@@ -27,7 +33,7 @@ v0.50 - 12112011 [ frozen 3:16 PM EST 12/11/2011 ]
 
 An image scouring tool for reddit.
 
-Copyright (c) 2011 Andy Kulie.
+Copyright (c) 2011-2012 Andy Kulie.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -36,18 +42,27 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+album_active = True # activate album downloads until told otherwise (v0.55)
+
 import reddit
 import os
+import subprocess # new for v0.55 - added for imgur album support
 import urllib
 from urlparse import urlparse # for parsing out *.jpg from url (python 2)
 from optparse import OptionParser # for parsing command line options
 from posixpath import basename # for url splitting on non-imgur urls
+try:
+    import imguralbum
+except:
+    print "imguralbum.py not found.  Imgur album downloads will be disabled."
+    album_active=False
+
 
 # add system argument for verbose mode
 verbose_mode = False
 overwrite_mode = False # added to support overwrite behavior (new default is no overwrite)
 nsfw_mode = False # added to support nsfw behavior (new default is NO nsfw items)
-current_version = "%prog 0.54-12152011"
+current_version = "%prog 0.55-10192012"
 current_dir = os.getcwd()
 
 ## start parse arguments
@@ -60,6 +75,7 @@ parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", he
 parser.add_option("-n", "--nsfw", action="store_true", dest="nsfw", help="allow download of nsfw items") # added to support nsfw filtering
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
 parser.add_option("-q", "--quiet", action="store_false", dest="verbose")
+parser.add_option("-a", "--album", action="store_true", dest="album", help="disable Imgur album downloading even if imguralbum.py is available") # added v0.55 to support suppression of imgur album downloads (they take longer)
 (options, args) = parser.parse_args() 
 if options.verbose:
     verbose_mode = True
@@ -67,7 +83,11 @@ if options.overwrite:
     overwrite_mode = True
 if options.nsfw:
     nsfw_mode = True
+if options.album:
+    album_active = False
+
 ## end parse arguments
+
 
 """
 submissions(subr_name, subr_filter, subr_limit)
@@ -102,6 +122,7 @@ build_imgur_dl(url)
 def build_imgur_dl(url):
     return 'http://' + 'i.' + url.netloc + url.path + '.jpg'
     # to be added: exceptions for if it's a png or gif
+
 
 # initialize reddit object
 r = reddit.Reddit(user_agent='sample_app')
@@ -142,11 +163,27 @@ for index, i in enumerate(sublist):
             savedto = urllib.urlretrieve(i.url, os.path.join(current_dir, basename(parsed_url.path)))
             if verbose_mode: print savedto
     elif (parsed_url.netloc == 'imgur.com'):
+        # imguralbum.py support added in v0.55
         if (parsed_url.path[0:3] == '/a/'):
-            if verbose_mode: print "Imgur album path not yet supported."
-            summary.append(i.url + " is an Imgur album path.\nThese are not yet supported by debaser.")
-            success -= 1
-            # add support using imgur album downloader & make subdirectory for it
+            if verbose_mode: print "Imgur album path.  Downloading..."
+
+            if album_active:
+                # Only checks if album path already exists.  If it does, it won't try re-downloading the files within the album
+                # regardless of whether they have changed.  This is the simplest solution at the moment.  A better one will follow.
+                if (not(overwrite_mode) and os.path.exists(os.path.join(current_dir, basename(parsed_url.path)))):
+                    if verbose_mode: print "Album path already exists in current directory.  Contents will not be re-downloaded."
+                    summary.append(i.url + " already exists as an album path.\nUse -o flag to enable overwrite mode.")
+                    success -= 1
+                else:
+                    if verbose_mode: print "Downloading Imgur album. Please wait..."
+                    downloader = imguralbum.ImgurAlbumDownloader(i.url, output_messages=False)
+                    downloader.save_images()
+
+            else:
+                print "Imgur album support deactivated.  Either imguralbum.py is missing or you ran this script with the -a --album flag."
+                summary.append(i.url + " is an Imgur album path.\nimguralbum.py required for album downloads.\nIt is either missing or you ran this script with the -a flag")
+                success -= 1
+
         else:
             if (not(overwrite_mode) and os.path.exists(current_dir + parsed_url.path + '.jpg')): # fixed overwrite bug by adding .jpg & modifying path join
                  if verbose_mode: print "File already exits in " + current_dir + ".  Download aborted."

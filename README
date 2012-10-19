@@ -9,6 +9,12 @@ Debaser is a simple image scouring utility for Reddit.  It is free and open
 source, and written in Python using the reddit_api bindings.
 ===============================================================================
 >> VERSION INFORMATION
+v0.55 - 10192012
+  * Added support for Imgur albums if imguralbum.py is available
+  * Added -a --album flag to allow for suppression of album downloads if desired.
+  * Currently, debaser.py only checks if an album exists, not whether its contents exist
+    when not using -o --overwrite mode.
+
 v0.54 - 12152011
   * Changed nsfw behavior:  no nsfw by default
   * Added -n --nsfw flag to support previous behavior
@@ -42,6 +48,13 @@ https://github.com/mellort/reddit_api
 Debaser also requires Python 2.x specifically, as reddit_api and urllib are
 Python 2-specific.
 
+As of v0.55, Debaser includes support for downloading Imgur albums using
+the imgur-album-downloader, a fancy little program that can be found here:
+https://github.com/alexgisby/imgur-album-downloader
+You can place imguralbum.py in the same directory as debaser.py (or anywhere else
+your Python environment might find it, I would imagine) to activate this
+support.
+
 Debaser is a simple Python script that can be run from the command line.
 Therefore, you can run it from wherever it's installed.  I usually place my
 scripts in /opt and reference them via symlink to /usr/local/bin, but that's
@@ -70,6 +83,14 @@ set, other than giving you a warning message that it was skipped and its
 index in the list of submissions being scoured (if the --verbose flag is
 also set).
 
+ALSO ALSO NOTE!  As of version 0.55, debaser.py supports Imgur album downloads
+through an external module called imgur-album-downloader (imguralbum.py) that
+can be found here: https://github.com/alexgisby/imgur-album-downloader
+If you don't have it, debaser.py still works the same as it did in 0.54, with
+a few extra messages in verbose mode.  Additionally, you can suppress album
+downloads for the sake of brevity (albums take a while to download, as you might
+expect) using the new -a or --album flags.
+
 Below is the command line syntax of debaser.py:
 
 Usage: debaser.py [options] arg
@@ -87,8 +108,10 @@ Options:
                         caution)
   -n, --nsfw            allow download of nsfw items
   -v, --verbose         
-  -q, --quiet           
-
+  -q, --quiet      
+  -a, --album           disable Imgur album downloading even if imguralbum.py
+                        is available
+   
 The subreddit can be basically any subreddit that exists.  For example:  pics,
 gaming, battlestations
 
@@ -141,7 +164,7 @@ I mentioned above).
 ===============================================================================
 >> LICENSE
 
-Copyright (c) 2011 Andy Kulie.
+Copyright (c) 2011-2012 Andy Kulie.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
